@@ -6,3 +6,5 @@
 - Scripts : where we are going to store notebooks
 - Output : plots, table and logbook of the project 
 - Input : All data sources
+
+This is Leandro's first commit.
