@@ -24,3 +24,4 @@ Intermediate tables:
 - `departments`: Departments and their codes. Taken from [the DANE.](https://geoportal.dane.gov.co/consultadivipola.html)
 - `municipalities`: Municipalities and their codes. Taken from [the DANE.](https://geoportal.dane.gov.co/consultadivipola.html)
 - `edad_dict`: A table that contains the translation of the codes for the ages that are in the `per` table.
+- `education_dict`: A table that contains the translation of the codes for the education levels that are in the `per` table.
