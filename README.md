@@ -8,3 +8,22 @@
 - Input : All data sources
 
 This is Leandro's first commit.
+
+## Database tables
+
+Our database has the following tables:
+
+- `per`: Personas (people.)
+- `viv`: Viviendas (houses.)
+- `hog`: Hogares (households.)
+- `mgn`: Marco geográfico nacional (geographical data.)
+- `fall`: Fallecidos (deceased people.)
+
+Intermediate tables:
+
+- `departments`: Departments and their codes. Taken from [the DANE.](https://geoportal.dane.gov.co/consultadivipola.html)
+- `municipalities`: Municipalities and their codes. Taken from [the DANE.](https://geoportal.dane.gov.co/consultadivipola.html)
+- `edad_dict`: A table that contains the translation of the codes for the ages that are in the `per` table.
+- `education_dict`: A table that contains the translation of the codes for the education levels that are in the `per` table.
+- `marital_dict`: A table that contains the translation of the codes for the marital status that is a column in the `per` table.
+- `sex_dict`: A table that contains the translation of the codes for sex, which is a column in the `per` table.
