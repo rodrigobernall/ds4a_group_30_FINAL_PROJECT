@@ -25,3 +25,4 @@ Intermediate tables:
 - `municipalities`: Municipalities and their codes. Taken from [the DANE.](https://geoportal.dane.gov.co/consultadivipola.html)
 - `edad_dict`: A table that contains the translation of the codes for the ages that are in the `per` table.
 - `education_dict`: A table that contains the translation of the codes for the education levels that are in the `per` table.
+- `marital_dict`: A table that contains the translation of the codes for the marital status that is a column in the `per` table.
