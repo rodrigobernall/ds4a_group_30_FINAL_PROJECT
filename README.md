@@ -26,3 +26,4 @@ Intermediate tables:
 - `edad_dict`: A table that contains the translation of the codes for the ages that are in the `per` table.
 - `education_dict`: A table that contains the translation of the codes for the education levels that are in the `per` table.
 - `marital_dict`: A table that contains the translation of the codes for the marital status that is a column in the `per` table.
+- `sex_dict`: A table that contains the translation of the codes for sex, which is a column in the `per` table.
