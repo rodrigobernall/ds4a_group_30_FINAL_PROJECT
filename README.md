@@ -27,3 +27,7 @@ Intermediate tables:
 - `education_dict`: A table that contains the translation of the codes for the education levels that are in the `per` table.
 - `marital_dict`: A table that contains the translation of the codes for the marital status that is a column in the `per` table.
 - `sex_dict`: A table that contains the translation of the codes for sex, which is a column in the `per` table.
+
+## GEIH tables
+
+- `geih2018_pob`: The table of the Great Integrated Household Survey 2018 (variable dictionary [here](http://microdatos.dane.gov.co/index.php/catalog/608/datafile/F2/?limit=100&offset=100#page=F2&tab=data-dictionary))
