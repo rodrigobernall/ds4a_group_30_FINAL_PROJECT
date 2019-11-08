@@ -31,3 +31,4 @@ Intermediate tables:
 ## GEIH tables
 
 - `geih2018_pob`: The table of the Great Integrated Household Survey 2018 (variable dictionary [here](http://microdatos.dane.gov.co/index.php/catalog/608/datafile/F2/?limit=100&offset=100#page=F2&tab=data-dictionary))
+- `v_income_dist`: A view that contains the data needed to compute the income distribution histogram.
