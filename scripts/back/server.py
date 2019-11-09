@@ -36,6 +36,28 @@ def retrieve_factors(table):
         }
     }
 
+@app.route('/filtered_table', methods=['POST'])
+def filtered_table():
+    payload = request.json
+    print(payload)
+    filters = process.filter_builder(payload["filters"])
+    print(filters)
+    data = process.table_builder(payload["table"],  filters)
+    if data.empty==False:
+        info_tabla = data.to_dict()
+
+
+    else:
+        info_tabla = "no info"
+
+    obj = {
+        'status': 'OK',
+        'data': {
+            'table':info_tabla
+        }
+    }
+    return jsonify(obj)
+
 
 @app.route('/status', methods=["GET"])
 def status():
