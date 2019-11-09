@@ -54,7 +54,9 @@ marital_select = create_dropdown_selector(sel_id='marital-select', pandas_series
 sex_select = create_dropdown_selector(sel_id='sex-select', pandas_series=sex['sex_code'])
 
 app.layout = html.Div(
-	children=[title_div,
+	children=[
+		title_div,
+		html.P('Hi, Zach. This is our demo. The dropdown lists are getting their data from our API, which takes the data from our RDS PostgreSQL instance. Estado civil means marital status'),
 		html.Div(
 			children=[html.H6("Estado civil",), marital_select]
 		),
