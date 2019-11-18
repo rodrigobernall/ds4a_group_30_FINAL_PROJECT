@@ -7,6 +7,6 @@
 1. We unzipped each and every file and deleted the header (using `sed`) and a column that was a by-product of the Stata to CSV conversion. In order to do that, we ungzipped every file in each folder, used `cut` (from Bash) to get rid of the excess column and gzipped again.
 1. We used Bash to classify the files in folders. For instance, for the `per` dataset (persons,) we used `mkdir per` and then `mv *per_list.csv.gz per` to get all the files into the same directory.
 1. We gzipped the files again and concatenated them (using `cat`) into one big file per table.
-1. We used `psql \copy` to upload the gzipped files to the AWS RDS PostgreSQL instance. This part was done manually with this command (here `per` is the example table): `\copy per from program 'gzip -dc per_concatenated.csv.gz' DELIMITER ',' CSV HEADER NULL`
+1. We used `psql \copy` to upload the gzipped files to the AWS RDS PostgreSQL instance. This part was done manually with this command (here `per` is the example table): `\copy per from program 'gzip -dc per_concatenated.csv.gz' DELIMITER ',' CSV`
 
 A Bash script with the commands used can be found in the current directory.
