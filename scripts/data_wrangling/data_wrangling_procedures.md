@@ -10,3 +10,12 @@
 1. We used `psql \copy` to upload the gzipped files to the AWS RDS PostgreSQL instance. This part was done manually with this command (here `per` is the example table): `\copy per from program 'gzip -dc per_concatenated.csv.gz' DELIMITER ',' CSV`
 
 A Bash script with the commands used can be found in the current directory.
+
+The `municipalities` table had from its original source a unique identifier for each municipality, but this identifier was incompatible with the other data sources because it was concatenated to the department identifier. For instance, Medellín's id was `05001`, and we needed it to be just `001` (`05` is the identifier of the department of which Medellín is the capital.) In order to correct this situation, we created a new column and updated it with a SQL `UPDATE` statement:
+
+```SQL
+update municipalities set divipol_municipality_clean=subquery.right
+from(select divipol_municipality, right(divipol_municipality, 3) from municipalities) as subquery
+where municipalities.divipol_municipality=subquery.divipol_municipality;
+
+```
