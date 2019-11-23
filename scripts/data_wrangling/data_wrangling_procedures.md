@@ -23,4 +23,10 @@ where municipalities.divipol_municipality=subquery.divipol_municipality;
 ```
 ## Great survey data
 
-1. In the table `area_ocupados`, question `P6780S1` needs to be cleaned in the original CSV dataset (is an integer field but contains dots (.))
+Since the downloaded data has commas as decimal delimiters, we had to replace them with dots. We used the following Bash script:
+
+```Bash
+sed -i 's/\([0-9]\),/\1./g' *.csv
+
+```
+See an explanation of this command [here](https://stackoverflow.com/questions/38593855/replacing-commas-in-a-csv-file-with-sed-for-mongoimport).
