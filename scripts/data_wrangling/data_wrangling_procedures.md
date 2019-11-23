@@ -26,9 +26,16 @@ where municipalities.divipol_municipality=subquery.divipol_municipality;
 Since the downloaded data has commas as decimal delimiters, we had to replace them with dots. We renamed all the files that corresponded to the same table because they had different names, and then replaced the delimiters with a `sed` regex. For instance, for the `area_ocupados` table, we did this (while in a directory that contained the original zipped files from the DANE):
 
 ```Bash
+# Unzip the files
 for file in `ls`; do unzip $file; done
+
+# Process the data for the area_ocupados table
 find . -type f -name '*rea - Ocupados.csv' -execdir mv {} area_ocupados.csv ';'
 find -name 'area_ocupados.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
+
+# Process the data for the area_personas table
+find . -type f -name '*rea - Caracter*sticas generales (Personas).csv' -execdir mv {} area_personas.csv ';'
+find . -name 'area_personas.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
 
 ```
 See an explanation of the sed command [here](https://stackoverflow.com/questions/38593855/replacing-commas-in-a-csv-file-with-sed-for-mongoimport). For the `find` command used to rename the file read [here](https://unix.stackexchange.com/a/261048)
