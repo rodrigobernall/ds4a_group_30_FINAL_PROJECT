@@ -15,8 +15,7 @@ header_csv=$(sed 1q Enero.csv/cabecera_personas.csv | sed 's/;/,/g')
 header_sql=" ($header_csv) "
 find . -name 'cabecera_personas.csv' -exec sed -i '1d' {} \;
 find . -name 'cabecera_personas.csv' -exec cat {} > cabecera_personas_concat.csv +
-cut -d ";" -f4,5,33,38,39,57,58 cabecera_personas_concat.csv --complement > cabecera_personas_concat_clean.csv # There are some duplicated columns in the raw dataframe.
-PGPASSWORD=$DB_PASS_FINAL_30 psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy personas $header_sql FROM cabecera_personas_concat_clean.csv CSV DELIMITER ';' HEADER NULL ' '"
+PGPASSWORD=$DB_PASS_FINAL_30 psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy personas $header_sql FROM cabecera_personas_concat.csv CSV DELIMITER ';' HEADER NULL ' '"
 
 # Process the data for the area_fuerza_trabajo table and do the SQL copy
 find . -type f -name '*rea - Fuerza de trabajo.csv' -execdir mv {} area_fuerza_trabajo.csv ';'
