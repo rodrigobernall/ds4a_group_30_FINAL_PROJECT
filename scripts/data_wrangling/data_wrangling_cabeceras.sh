@@ -1,8 +1,7 @@
 # Process the data for the area_vivienda_hogares table and do the SQL copy
 find . -type f -name 'Cabecera - Vivienda y Hogares.csv' -execdir mv {} cabecera_vivienda_hogares.csv ';'
 find . -name 'cabecera_vivienda_hogares.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
-find . -name 'cabecera_vivienda_hogares.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy vivienda_hogares (DIRECTORIO, SECUENCIA_P, P5000, P5010, P5020, P5030, P5040, P5050, P5070, P5080, P5090, P5090S1, P5100, P5110, P5130, P5140, P5210S1, P5210S2, P5210S3, P5210S4, P5210S5, P5210S6, P5210S7, P5210S8, P5210S9, P5210S10, P5210S11, P5210S14, P5210S15, P5210S16, P5210S17, P5210S18, P5210S19, P5210S20, P5210S21, P5210S22, P5210S24, P5220, P5220S1, P6008, P6007, P6007S1, HOGAR, P4000, P4010, P4020, P4030S1, P4030S1A1, P4030S2, P4030S3, P4030S4, P4030S4A1, P4030S5, P4040, REGIS, clase, MES, DPTO, fex_c_2011, AREA)
-FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
+find . -name 'cabecera_vivienda_hogares.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy vivienda_hogares (DIRECTORIO, SECUENCIA_P, P5000, P5010, P5020, P5030, P5040, P5050, P5070, P5080, P5090, P5090S1, P5100, P5110, P5130, P5140, P5210S1, P5210S2, P5210S3, P5210S4, P5210S5, P5210S6, P5210S7, P5210S8, P5210S9, P5210S10, P5210S11, P5210S14, P5210S15, P5210S16, P5210S17, P5210S18, P5210S19, P5210S20, P5210S21, P5210S22, P5210S24, P5220, P5220S1, P6008, P6007, P6007S1, HOGAR, P4000, P4010, P4020, P4030S1, P4030S1A1, P4030S2, P4030S3, P4030S4, P4030S4A1, P4030S5, P4040, REGIS, clase, MES, DPTO, fex_c_2011, AREA) FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
 
 # Process the data for the area_ocupados table and do the SQL copy
 find . -type f -name '*rea - Ocupados.csv' -execdir mv {} area_ocupados.csv ';'
