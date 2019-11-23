@@ -29,9 +29,14 @@ Since the downloaded data has commas as decimal delimiters, we had to replace th
 # Unzip the files
 for file in `ls`; do unzip $file; done
 
+# Process the data for the area_vivienda_hogares table and do the SQL copy
+find . -type f -name '*rea - Vivienda y Hogares.csv' -execdir mv {} area_vivienda_hogares.csv ';'
+find . -name 'area_vivienda_hogares.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
+find . -name 'area_vivienda_hogares.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_vivienda_hogares FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
+
 # Process the data for the area_ocupados table and do the SQL copy
 find . -type f -name '*rea - Ocupados.csv' -execdir mv {} area_ocupados.csv ';'
-find -name 'area_ocupados.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
+find . -name 'area_ocupados.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
 find . -name 'area_ocupados.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_ocupados FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
 
 # Process the data for the area_personas table and do the SQL copy
