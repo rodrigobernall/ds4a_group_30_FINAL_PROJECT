@@ -12,7 +12,7 @@ find . -name 'cabecera_ocupados.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME
 find . -type f -name 'Cabecera - Caracter*sticas generales (Personas).csv' -execdir mv {} cabecera_personas.csv ';'
 find . -name 'cabecera_personas.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
 header_csv=$(sed 1q Enero.csv/cabecera_personas.csv | sed 's/;/,/g')
-header_sql=" ($header_csv) "
+header_sql="($header_csv)"
 find . -name 'cabecera_personas.csv' -exec sed -i '1d' {} \;
 find . -name 'cabecera_personas.csv' -exec cat {} > cabecera_personas_concat.csv +
 PGPASSWORD=$DB_PASS_FINAL_30 psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy personas $header_sql FROM cabecera_personas_concat.csv CSV DELIMITER ';' HEADER NULL ' '"
