@@ -23,61 +23,10 @@ where municipalities.divipol_municipality=subquery.divipol_municipality;
 ```
 ## Great survey data
 
-Since the downloaded data has commas as decimal delimiters, we had to replace them with dots. We renamed all the files that corresponded to the same table because they had different names, and then replaced the delimiters with a `sed` regex. For instance, for the `area_ocupados` table, we did this (while in a directory that contained the original zipped files from the DANE):
+Since the downloaded data has commas as decimal delimiters, we had to replace them with dots. We renamed all the files that corresponded to the same table because they had different names, and then replaced the delimiters with a `sed` regex. Then we copied the files to PostgreSQL.
 
-```Bash
-# Unzip the files
-for file in `ls`; do unzip $file; done
+The code used to clean and preprocess the data, and insert it into PostgreSQL can be found in this directory.
 
-# Process the data for the area_vivienda_hogares table and do the SQL copy
-find . -type f -name '*rea - Vivienda y Hogares.csv' -execdir mv {} area_vivienda_hogares.csv ';'
-find . -name 'area_vivienda_hogares.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
-find . -name 'area_vivienda_hogares.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_vivienda_hogares FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
+Some issues:
 
-# Process the data for the area_ocupados table and do the SQL copy
-find . -type f -name '*rea - Ocupados.csv' -execdir mv {} area_ocupados.csv ';'
-find . -name 'area_ocupados.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
-find . -name 'area_ocupados.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_ocupados FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
-
-# Process the data for the area_personas table and do the SQL copy
-find . -type f -name '*rea - Caracter*sticas generales (Personas).csv' -execdir mv {} area_personas.csv ';'
-find . -name 'area_personas.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
-find . -name 'area_personas.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_personas FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
-
-# Process the data for the area_fuerza_trabajo table and do the SQL copy
-find . -type f -name '*rea - Fuerza de trabajo.csv' -execdir mv {} area_fuerza_trabajo.csv ';'
-find . -name 'area_fuerza_trabajo.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
-find . -name 'area_fuerza_trabajo.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_fuerza_trabajo FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
-
-# Process the data for the area_desocupados table and do the SQL copy
-find . -type f -name '*rea - Desocupados.csv' -execdir mv {} area_desocupados.csv ';'
-find . -name 'area_desocupados.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
-find . -name 'area_desocupados.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_desocupados FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
-
-
-# Process the data for the area_inactivos table and do the SQL copy
-find . -type f -name '*rea - Inactivos.csv' -execdir mv {} area_inactivos.csv ';'
-find . -name 'area_inactivos.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
-find . -name 'area_inactivos.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_inactivos FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
-
-
-# Process the data for the area_otras_actividades_ayudas table and do the SQL copy
-find . -type f -name '*rea - Otras actividades y ayudas en la semana.csv' -execdir mv {} area_otras_actividades_ayudas.csv ';'
-find . -name 'area_otras_actividades_ayudas.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
-find . -name 'area_otras_actividades_ayudas.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_otras_actividades_ayudas FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
-
-
-# Process the data for the area_otros_ingresos table and do the SQL copy
-find . -type f -name '*rea - Otros ingresos.csv' -execdir mv {} area_otros_ingresos.csv ';'
-find . -name 'area_otros_ingresos.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
-find . -name 'area_otros_ingresos.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_otros_ingresos FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
-
-
-```
-See an explanation of the sed command [here](https://stackoverflow.com/questions/38593855/replacing-commas-in-a-csv-file-with-sed-for-mongoimport). For the `find` command used to rename the file read [here](https://unix.stackexchange.com/a/261048)
-
-Then we copied the files into PostgreSQL:
-
-```SQL
-\copy area_ocupados FROM '/path/area_ocupados.csv'  CSV DELIMITER ';' HEADER NULL ' '
-```
+1. The "Cabeceras - Características Generales (Personas)" tables had a different set of columns than that listed in the dictionary of variables (which served as the template for our database DDL.) We had to manually work out a solution.
