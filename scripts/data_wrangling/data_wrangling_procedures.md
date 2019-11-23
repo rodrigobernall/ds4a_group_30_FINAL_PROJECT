@@ -67,6 +67,12 @@ find . -name 'area_otras_actividades_ayudas.csv' -exec sed -i 's/\([0-9]\),/\1./
 find . -name 'area_otras_actividades_ayudas.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_otras_actividades_ayudas FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
 
 
+# Process the data for the area_otros_ingresos table and do the SQL copy
+find . -type f -name '*rea - Otros ingresos.csv' -execdir mv {} area_otros_ingresos.csv ';'
+find . -name 'area_otros_ingresos.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
+find . -name 'area_otros_ingresos.csv' -exec psql -h $DB_HOST_FINAL_30 -d $DB_NAME_FINAL_30 -U $DB_USER_FINAL_30 -c "\\copy area_otros_ingresos FROM {}  CSV DELIMITER ';' HEADER NULL ' '"  \;
+
+
 ```
 See an explanation of the sed command [here](https://stackoverflow.com/questions/38593855/replacing-commas-in-a-csv-file-with-sed-for-mongoimport). For the `find` command used to rename the file read [here](https://unix.stackexchange.com/a/261048)
 
