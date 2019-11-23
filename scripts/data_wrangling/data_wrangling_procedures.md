@@ -29,4 +29,4 @@ The code used to clean and preprocess the data, and insert it into PostgreSQL ca
 
 Some issues:
 
-1. The "Cabeceras - Características Generales (Personas)" tables had a different set of columns than that listed in the dictionary of variables (which served as the template for our database DDL.) We had to manually work out a solution.
+1. The "Cabeceras - Características Generales (Personas)" tables had a different set of columns than that listed in the dictionary of variables (which served as the template for our database DDL.) We had to manually work out a solution. In the end, we changed the DDL to match the input CSV files.
