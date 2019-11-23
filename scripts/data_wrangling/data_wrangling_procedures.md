@@ -1,4 +1,6 @@
-# Data wrangling log
+# DATA WRANGLING LOG
+
+## Census data
 
 1. We downloaded our raw data from the DANE website as Stata files and compressed it.
 1. The compressed file was uploaded to a personal Dropbox account ([link]('https://www.dropbox.com/sh/y6mye017c5oitfy/AAC7ci0RWx17eBRIQumfA6TYa?dl=1))
@@ -19,3 +21,6 @@ from(select divipol_municipality, right(divipol_municipality, 3) from municipali
 where municipalities.divipol_municipality=subquery.divipol_municipality;
 
 ```
+## Great survey data
+
+1. In the table `area_ocupados`, question `P6780S1` needs to be cleaned in the original CSV dataset (is an integer field but contains dots (.))
