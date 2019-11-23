@@ -31,4 +31,10 @@ find . -type f -name '*rea - Ocupados.csv' -execdir mv {} area_ocupados.csv ';'
 find -name 'area_ocupados.csv' -exec sed -i 's/\([0-9]\),/\1./g' {} \;
 
 ```
-See an explanation of the sed command [here](https://stackoverflow.com/questions/38593855/replacing-commas-in-a-csv-file-with-sed-for-mongoimport). For the `find` command used to renema the file read [here](https://unix.stackexchange.com/a/261048)
+See an explanation of the sed command [here](https://stackoverflow.com/questions/38593855/replacing-commas-in-a-csv-file-with-sed-for-mongoimport). For the `find` command used to rename the file read [here](https://unix.stackexchange.com/a/261048)
+
+Then we copied the files into PostgreSQL:
+
+```SQL
+\copy area_ocupados FROM '/path/area_ocupados.csv'  CSV DELIMITER ';' HEADER NULL ' '
+```
