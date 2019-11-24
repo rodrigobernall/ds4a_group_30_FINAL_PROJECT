@@ -17,7 +17,7 @@ def table_query(query, engine=engine_creator()):
     return (df)
 
 def table_builder(table, array_filters= []):
-    base= "select * from postgres.public." + str(table)
+    base= "select * from " + str(table)
     if len(array_filters) > 0:
         base = base + " where " + array_filters.pop(0)
         if len(array_filters) >0:
