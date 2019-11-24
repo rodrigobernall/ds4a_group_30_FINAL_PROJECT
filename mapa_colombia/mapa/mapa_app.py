@@ -18,6 +18,7 @@ df_correc['DPTO']=df_correc['DPTO'].apply(lambda x: '{0:0>3}'.format(x))
 df_correc['MPIO']=df_correc['MPIO'].apply(lambda x: '{0:0>3}'.format(x))
 df_correc['COD_DANE']=df_correc['DPTO'].astype(str)+df_correc['MPIO'].astype(str)
 
+
 app.layout = html.Div(children=[
     html.Div(
         children=[
@@ -31,8 +32,8 @@ app.layout = html.Div(children=[
                 dcc.Dropdown(
                     id="study-dropdown",
                     multi=True,
-                    value=('LA PRIMAVERA',),
-                    options=[{'label': label.title(), 'value': label.title()} for label in df_correc['NOMBRE_MPI'].unique()]
+                    value=('SANTAFE DE BOGOTA D.C.',),
+                    options=[{'label': label, 'value': label} for label in df_correc['NOMBRE_MPI'].unique()]
                 )
             ]
     ),
@@ -44,27 +45,59 @@ app.layout = html.Div(children=[
                 children=[
                     html.Div(
                         dcc.Graph(id='map-plot', figure={ 
-            'data': [go.Choroplethmapbox(
-                geojson=geojson,
-                locations=df_correc['MPIOS'],
-                z=df_correc['HECTARES'],
-                colorscale='earth',
-                text=df_correc['NOMBRE_MPI'],
-                colorbar_title="HECTAREAS"
-            )],
-            'layout': go.Layout(
-                    mapbox_style="open-street-map",
-                    mapbox_accesstoken=token,
-                    mapbox_zoom=4,
-                    margin={'t': 0, 'l': 0, 'r': 0, 'b': 0},
-                    mapbox_center={"lat": 4.6109886, "lon": -74.072092}
-                )
+                            'data': [go.Choroplethmapbox()],
+                            'layout': go.Layout(
+                                    mapbox_style="dark",
+                                    mapbox_accesstoken=token,
+                                    mapbox_zoom=5,
+                                    margin={'t': 0, 'l': 0, 'r': 0, 'b': 0},
+                                    mapbox_center={"lat": 4.6109886, "lon": -74.072092}
+                                )
         }),
                     ),                     
                 ])
             ]
         )]
 )
+
+def get_filtered_rows(municipios):
+    data = df_correc[df_correc['NOMBRE_MPI'].isin(municipios)].copy()
+    return data
+
+def info_por_municipio(municipios):
+    data =[]
+    # print(municipios)
+    df = get_filtered_rows(municipios)
+    # print(df)
+    data.append(go.Choroplethmapbox(
+                geojson=geojson,
+                locations=df['MPIOS'],
+                z=df['HECTARES'],
+                colorscale='earth',
+                text=df['NOMBRE_MPI'],
+                colorbar_title="HECTAREAS"
+            ))
+    # print(data)
+    return data
+
+@app.callback(
+    dash.dependencies.Output('map-plot', 'figure'), # component with id map-plot will be changed, the 'figure' argument is updated
+    [
+        dash.dependencies.Input('study-dropdown', 'value'),
+    ]
+)
+def actualizar_mapa(value):
+    return { 
+            'data': info_por_municipio(value),
+            'layout': go.Layout(
+                mapbox_style="open-street-map",
+                mapbox_accesstoken=token,
+                mapbox_zoom=6,
+                margin={'t': 0, 'l': 0, 'r': 0, 'b': 0},
+                mapbox_center={"lat": 4.6109886, "lon": -74.072092}
+            )
+        }
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
