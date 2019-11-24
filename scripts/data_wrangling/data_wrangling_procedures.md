@@ -1,4 +1,6 @@
-# Data wrangling log
+# DATA WRANGLING LOG
+
+## Census data
 
 1. We downloaded our raw data from the DANE website as Stata files and compressed it.
 1. The compressed file was uploaded to a personal Dropbox account ([link]('https://www.dropbox.com/sh/y6mye017c5oitfy/AAC7ci0RWx17eBRIQumfA6TYa?dl=1))
@@ -19,3 +21,12 @@ from(select divipol_municipality, right(divipol_municipality, 3) from municipali
 where municipalities.divipol_municipality=subquery.divipol_municipality;
 
 ```
+## Great survey data
+
+Since the downloaded data has commas as decimal delimiters, we had to replace them with dots. We renamed all the files that corresponded to the same table because they had different names, and then replaced the delimiters with a `sed` regex. Then we copied the files to PostgreSQL.
+
+The code used to clean and preprocess the data, and insert it into PostgreSQL can be found in this directory.
+
+Some issues:
+
+1. The "Cabeceras - Características Generales (Personas)" tables had a different set of columns than that listed in the dictionary of variables (which served as the template for our database DDL.) We had to manually work out a solution. In the end, we changed the DDL to match the input CSV files.
