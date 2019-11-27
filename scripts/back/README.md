@@ -14,3 +14,19 @@
 	"table":"per",
 	"filters":{"u_dpto":["54"], "u_mpio":["405"],"p_sexo":["2.0"], "p_edad":["3.0"], "p_est_civil":["7.0"], "p_nivel_anos":["1.0"]}
 }
+
+- Agregaciones por factores se puedne consultar en el end point `ec2-3-133-150-215.us-east-2.compute.amazonaws.com:8020/agg_pct` la firma es del tipo:
+    - {
+	"tabla":"personas",
+	"var_agg":"p6030S1",
+	"agregador":"dpto"
+      }
+       - En este caso la tabla que se quiere analizar es personas la variable que se quiere agregar es el porcentaje de la edad  `var_agg` y el agregador sobre el cual se va a sacar el porcentaje es el `dpto`
+       
+     - Para la distribucion de genero el ejemplo seria {
+	"tabla":"personas",
+	"var_agg":"p6020",
+	"agregador":"dpto"
+        }
+        
+     - Pueden salir NAN y son casos en los que no se especifica la edad o el factor de agregacion 
