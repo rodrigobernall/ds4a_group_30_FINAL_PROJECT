@@ -6,6 +6,7 @@ import os
 import models.filter_model as process
 
 
+
 app = Flask(__name__)
 
 
@@ -43,6 +44,25 @@ def filtered_table():
     filters = process.filter_builder(payload["filters"])
     print(filters)
     data = process.table_builder(payload["table"],  filters)
+    if data.empty==False:
+        info_tabla = data.to_dict()
+
+
+    else:
+        info_tabla = "no info"
+
+    obj = {
+        'status': 'OK',
+        'data': {
+            'table':info_tabla
+        }
+    }
+    return jsonify(obj)
+
+@app.route('/agg_pct', methods=['POST'])
+def agg_table():
+    payload = request.json
+    data = process.agg_builder_percent(payload["tabla"], payload["var_agg"], payload["agregador"])
     if data.empty==False:
         info_tabla = data.to_dict()
 

@@ -28,6 +28,19 @@ def table_builder(table, array_filters= []):
     tabla = table_query(base)
     return tabla
 
+def agg_builder_percent(table= "personas", agg_val="p6020", agg_val2= "dpto"):
+    base= """with temp as (SELECT dpto, p6020, count(*) AS percentage 
+            FROM   personas 
+            group by 1,2)
+            
+            select t.dpto, t.p6020, float4(t.percentage)/cuenta as percentage
+            from temp t
+            left join (select dpto, count(*) as cuenta from personas group by 1) t2
+            on t.dpto =t2.dpto
+            """.replace("personas", table).replace("p6020", agg_val).replace("dpto", agg_val2)
+    tabla = table_query(base)
+    return tabla
+
 #departments, crear el filter builder
 
 # Test de fillter builder so it can be iterated or used the pop pytho
