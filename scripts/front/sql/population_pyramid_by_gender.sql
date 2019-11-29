@@ -1,1 +1,1 @@
-select case when ap.p6020=1 then 'Hombre' else 'Mujer' end as "Sexo", ap.p6040  as "Años cumplidos", round(sum(fex_c_2011)) as "Cantidad de personas" from area_personas ap where mes=9 group by ap.p6040, ap.p6020;
+select case when ap.p6020=1 then 'Hombre' else 'Mujer' end as "Sexo", ap.p6040  as "Años cumplidos", round(sum(fex_c_2011)) as "Cantidad de personas" from area_personas ap where mes=9 and p.area=11 group by ap.p6040, ap.p6020;
