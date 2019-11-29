@@ -17,14 +17,26 @@ df = pd.read_csv('Chile.csv')
 
 def fetch_series(series_name):
 	series_name = df[series_name]   # Temporal. Viene de la API
+	# r =requests.get('http://18.221.120.194:8020/factors/'+dict_name)
+	# print(r.json())
+	# r = pd.DataFrame.from_dict(r.json()['data']['topics'])
+	# index_col_name = r.columns[0]
+	# r = r.set_index(index_col_name)
+	# return r
 	return series_name
 
 ## Definition of the elements of our dashboard
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+
 title = html.H2(children="¿Cuántos como yo?", className='h2-title')
 title_div = html.Div(children=[title,],className='study-browser-banner row')
+
+token = 'pk.eyJ1IjoibmV3dXNlcmZvcmV2ZXIiLCJhIjoiY2o2M3d1dTZiMGZobzMzbnp2Z2NiN3lmdyJ9.cQFKe3F3ovbfxTsM9E0ZSQ'
+with open('data.json') as f:
+    geojson = json.loads(f.read())
+
 
 histogram_x_select = dcc.Dropdown(
     id="histogram-x-select",
@@ -40,7 +52,32 @@ app.layout = html.Div(children=[
 		dcc.Graph(id='histogram',
 		figure={}
 		)
-)])
+),
+
+html.Div(
+                        dcc.Graph(
+                            id='map-plot',
+                            figure={ 
+                                'data': [go.Choroplethmapbox(
+                                    geojson=geojson,
+                                    locations=df['ID_MUNICIPIO'],
+                                    z=df['ID_MUNICIPIO'],
+                                    colorscale='Viridis',
+                                    text=df['NOMBRE_MPI'],
+                                    colorbar_title="Prueba"
+                                )],
+                                'layout': go.Layout(
+                                        mapbox_style="dark",
+                                        mapbox_accesstoken=token,
+                                        mapbox_zoom=3,
+                                        margin={'t': 0, 'l': 0, 'r': 0, 'b': 0},
+                                        mapbox_center={"lat": 4.6482837, "lon": -74.2478922}
+                                    )
+                            }
+                        ),
+                    ),
+
+])
 
 
 
