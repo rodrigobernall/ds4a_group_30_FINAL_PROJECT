@@ -13,16 +13,18 @@ from pandas.io.json import json_normalize
 
 
 
-df = pd.read_csv('Chile.csv')
+def get_rows(str_query=None):
+    response = requests.post("http://ec2-3-133-150-215.us-east-2.compute.amazonaws.com:8020/raw_query", json={"raw_query":str_query})
+    return response.json()
+
+test_json = get_rows("select ap.p6040 as \"Edad\", round(sum(fex_c_2011)) as \"Cantidad de personas\" from area_personas ap where mes=3 group by ap.p6040")
+
+df = pd.DataFrame.from_dict(test_json['data']['table'])
+
+print(df)
 
 def fetch_series(series_name):
-	series_name = df[series_name]   # Temporal. Viene de la API
-	# r =requests.get('http://18.221.120.194:8020/factors/'+dict_name)
-	# print(r.json())
-	# r = pd.DataFrame.from_dict(r.json()['data']['topics'])
-	# index_col_name = r.columns[0]
-	# r = r.set_index(index_col_name)
-	# return r
+	series_name = df[series_name] 
 	return series_name
 
 ## Definition of the elements of our dashboard
@@ -33,15 +35,21 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 title = html.H2(children="¿Cuántos como yo?", className='h2-title')
 title_div = html.Div(children=[title,],className='study-browser-banner row')
 
-token = 'pk.eyJ1IjoibmV3dXNlcmZvcmV2ZXIiLCJhIjoiY2o2M3d1dTZiMGZobzMzbnp2Z2NiN3lmdyJ9.cQFKe3F3ovbfxTsM9E0ZSQ'
-with open('data.json') as f:
-    geojson = json.loads(f.read())
 
 
 histogram_x_select = dcc.Dropdown(
     id="histogram-x-select",
     options=[{'label': label, 'value': label} for label in df.columns],
-    value='income'
+)
+
+barplot_x_select = dcc.Dropdown(
+    id="barplot-x-select",
+    options=[{'label': label, 'value': label} for label in df.columns],
+)
+
+barplot_y_select = dcc.Dropdown(
+    id="barplot-y-select",
+    options=[{'label': label, 'value': label} for label in df.columns],
 )
 	
 
@@ -50,33 +58,15 @@ app.layout = html.Div(children=[
 	html.H6("Seleccione X para el histograma",), histogram_x_select,
     html.Div(
 		dcc.Graph(id='histogram',
-		figure={}
-		)
-),
+		figure={})
+	),
 
-html.Div(
-                        dcc.Graph(
-                            id='map-plot',
-                            figure={ 
-                                'data': [go.Choroplethmapbox(
-                                    geojson=geojson,
-                                    locations=df['ID_MUNICIPIO'],
-                                    z=df['ID_MUNICIPIO'],
-                                    colorscale='Viridis',
-                                    text=df['NOMBRE_MPI'],
-                                    colorbar_title="Prueba"
-                                )],
-                                'layout': go.Layout(
-                                        mapbox_style="dark",
-                                        mapbox_accesstoken=token,
-                                        mapbox_zoom=3,
-                                        margin={'t': 0, 'l': 0, 'r': 0, 'b': 0},
-                                        mapbox_center={"lat": 4.6482837, "lon": -74.2478922}
-                                    )
-                            }
-                        ),
-                    ),
-
+	html.H6("Seleccione X y Y para el diagrama de barras",), barplot_x_select, barplot_y_select,
+    html.Div(
+		dcc.Graph(id='barplot',
+		figure={})
+	),
+	
 ])
 
 
@@ -98,6 +88,27 @@ def update_histogram(x_name):
 			'layout': {'title': 'Histograma de {}'.format(x_name),}
 			}
 
+
+
+
+
+@app.callback(
+    dash.dependencies.Output('barplot', 'figure'),
+    (
+        dash.dependencies.Input('barplot-x-select', 'value'),
+        dash.dependencies.Input('barplot-y-select', 'value'),
+    )
+)
+
+def update_barplot(x_name, y_name):
+    series_x = fetch_series(x_name)
+    series_y = fetch_series(y_name)
+    
+    series_plot = go.Bar(x=series_x, y=series_y )
+    return {'data': 
+				[series_plot],
+			'layout': {'title': 'Diagrama de barras de {} y {}'.format(x_name, y_name),}
+			}
 
 if __name__ == "__main__":
     app.run_server(debug=True)
