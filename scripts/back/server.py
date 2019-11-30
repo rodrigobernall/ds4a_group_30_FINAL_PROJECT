@@ -79,6 +79,25 @@ def agg_table():
     return jsonify(obj)
 
 
+@app.route('/raw_query', methods=['POST'])
+def raw_query():
+    payload = request.json
+    data = process.table_query(payload["raw_query"])
+    if data.empty==False:
+        info_tabla = data.to_dict()
+
+
+    else:
+        info_tabla = "no info"
+
+    obj = {
+        'status': 'OK',
+        'data': {
+            'table':info_tabla
+        }
+    }
+    return jsonify(obj)
+
 @app.route('/status', methods=["GET"])
 def status():
     return jsonify({"message": "ok"})
