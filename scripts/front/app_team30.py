@@ -132,7 +132,17 @@ app.layout = html.Div(children=[
                             options=[
                                 {'label': 'Enero', 'value': '1'},
                                 {'label': 'Febrero', 'value': '2'},
-                                {'label': 'Marzo', 'value': '3'}
+                                {'label': 'Marzo', 'value': '3'},
+                                {'label': 'Abril', 'value': '4'},
+                                {'label': 'Mayo', 'value': '5'},
+                                {'label': 'Junio', 'value': '6'},
+                                {'label': 'Julio', 'value': '7'},
+                                {'label': 'Agosto', 'value': '8'},
+                                {'label': 'Septiembre', 'value': '9'},
+                                {'label': 'Octubre', 'value': '10'},
+                                {'label': 'Noviembre', 'value': '11'},
+                                {'label': 'Diciembre', 'value': '12'}
+
                             ],
                             value='1'
                         ),
@@ -142,8 +152,8 @@ app.layout = html.Div(children=[
                                     dcc.Dropdown(
                                         id="study-dropdown",
                                         multi=True,
-                                        value=('SANTAFE DE BOGOTA D.C.',),
-                                        options=[{'label': label, 'value': label} for label in df_correc['NOMBRE_MPI'].unique()]
+                                        value=(11,),
+                                        options=[{'label': label, 'value': value} for label, value in np.unique(df_correc[['NOMBRE_MPI', 'COD_DANE']], axis=0)]
                                     )
                                 ]
                         ),
@@ -176,7 +186,7 @@ app.layout = html.Div(children=[
                 [
                 html.Div(
                     [
-                       dcc.Graph(id="pie_graph4"),
+                       dcc.Graph(id="barplot"),
 
                     ],
                     className="pretty_container",
@@ -185,11 +195,26 @@ app.layout = html.Div(children=[
                 className="six columns",
             ),
             html.Div(
-                [
+                children=[
                    html.Div(
-                    [dcc.Graph(id="pie_graph2")],
-                    className="pretty_container",
-                ),
+                        [
+                        html.Div(
+                            [
+                                html.H6("Nivel Educativo:", className="control_label"),
+                                html.H6("Nivel Educativo:", className="control_label"),
+                                ],
+                            className="pretty_container",
+                        ),
+                        html.Div(
+                            [html.H6("Nivel Educativo:", className="control_label")],
+                            className="pretty_container",
+                        ),
+                        html.Div(
+                            [html.H6("Nivel Educativo:", className="control_label")],
+                            className="pretty_container",
+                        ),
+                        ],
+                    ),
                 ],
                 className="three columns",
             )
@@ -223,7 +248,7 @@ app.layout = html.Div(children=[
             ),
             html.Div(
                 [
-                    dcc.Graph(id="pie_graph3"),
+                    dcc.Graph(id="barplot_oficio"),
                 ],
                 className="six columns",
             ),       
@@ -265,7 +290,7 @@ def actualizar_mapa(value):
             'layout': go.Layout(
                 mapbox_style="open-street-map",
                 mapbox_accesstoken=token,
-                mapbox_zoom=6,
+                mapbox_zoom=7,
                 margin={'t': 0, 'l': 0, 'r': 0, 'b': 0},
                 mapbox_center={"lat": 4.6109886, "lon": -74.072092}
             )
@@ -276,7 +301,59 @@ def get_rows(str_query=None):
     response = requests.post("http://ec2-3-133-150-215.us-east-2.compute.amazonaws.com:8020/raw_query", json={"raw_query":str_query})
     return response.json()
 
-print(get_rows("select case when ap.p6020=1 then 'Hombre' else 'Mujer' end as Sexo, ap.p6040 as Anios_cumplidos from area_personas ap where mes=3 group by ap.p6040, ap.p6020"))
+
+def fetch_series(dfx, series_name):
+	series_name = dfx[series_name] 
+	return series_name
+
+@app.callback(
+    dash.dependencies.Output('barplot', 'figure'),
+    (
+        dash.dependencies.Input('month-dropdown', 'value'),
+    )
+)
+
+def update_barplot(month_value):
+    x_name = 'Edad'
+    y_name = 'Cantidad de personas'
+    test_json = get_rows("select ap.p6040 as \"Edad\", round(sum(fex_c_2011)) as \"Cantidad de personas\" from area_personas ap where mes="+month_value+" group by ap.p6040")
+
+    df = pd.DataFrame.from_dict(test_json['data']['table'])
+    
+    series_x = fetch_series(df, x_name)
+    series_y = fetch_series(df, y_name)
+    
+    series_plot = go.Bar(x=series_x, y=series_y )
+    return {'data': 
+				[series_plot],
+			'layout': {'title': 'Diagrama de barras de {} y {}'.format(x_name, y_name),}
+			}
+
+@app.callback(
+    dash.dependencies.Output('barplot_oficio', 'figure'),
+    (
+        dash.dependencies.Input('month-dropdown', 'value'),
+        dash.dependencies.Input('study-dropdown', 'value'),
+    )
+)
+
+def update_barplot_oficio(month_value, ciudad_value):
+    y_name = 'Oficio'
+    x_name = 'Cantidad de personas'
+    print(ciudad_value[0])
+    test_json = get_rows("select \"Oficio\", sum(\"Conteo\") as \"Cantidad de personas\" from view_ocupados vo where \"Ciudad\"='"+ciudad_value[0]+"' and \"Mes\"="+month_value+" group by \"Oficio\" order by \"Cantidad de personas\" DESC")
+
+    df = pd.DataFrame.from_dict(test_json['data']['table'])
+    print(df)
+
+    series_x = fetch_series(df, x_name)
+    series_y = fetch_series(df, y_name)
+    
+    series_plot = go.Bar(x=series_x, y=series_y, orientation='h' )
+    return {'data': 
+				[series_plot],
+			'layout': {'title': 'Diagrama de barras de {} y {}'.format(x_name, y_name),}
+			}
 
 
 if __name__ == "__main__":
