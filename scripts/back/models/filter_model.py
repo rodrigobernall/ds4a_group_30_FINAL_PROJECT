@@ -41,6 +41,33 @@ def agg_builder_percent(table= "personas", agg_val="p6020", agg_val2= "dpto"):
     tabla = table_query(base)
     return tabla
 
+
+def agg_builder_count(table="personas", agg_val="p6020", agg_val2="dpto", filter = "1=1"):
+    base = """SELECT dpto, p6020, count(*) AS total 
+            FROM   personas where filter_a
+            group by 1,2
+            """.replace("personas", table).replace("p6020", agg_val).replace("dpto", agg_val2).replace("filter_a", filter)
+    tabla = table_query(base)
+    return tabla
+
+def group_rows(table="personas", agg_val="p6020", agg_val2="dpto", filter = "1=1"):
+    base = """SELECT dpto, p6020
+            FROM   personas where filter_a
+            group by 1,2
+            """.replace("personas", table).replace("p6020", agg_val).replace("dpto", agg_val2).replace("filter_a", filter)
+    tabla = table_query(base)
+    return tabla
+
+def total_expansion(table="area_personas", agg_val="p6020", agg_val2="p6040", filter = "1=1"):
+    base = """SELECT dpto, p6020,
+                round(sum(fex_c_2011)) as total
+            FROM   personas where filter_a
+            group by 1,2
+            """.replace("personas", table).replace("p6020", agg_val).replace("dpto", agg_val2).replace("filter_a", filter)
+    tabla = table_query(base)
+    return tabla
+
+
 #departments, crear el filter builder
 
 # Test de fillter builder so it can be iterated or used the pop pytho

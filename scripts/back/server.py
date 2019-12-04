@@ -79,6 +79,73 @@ def agg_table():
     return jsonify(obj)
 
 
+@app.route('/build_count', methods=['POST'])
+def builder_count():
+    payload = request.json
+    if "filtro" in payload:
+        data = process.agg_builder_count(payload["tabla"], payload["var_agg"], payload["agregador"], payload["filtro"])
+    else:
+        data = process.agg_builder_count(payload["tabla"], payload["var_agg"], payload["agregador"])
+    if data.empty==False:
+        info_tabla = data.to_dict()
+
+
+    else:
+        info_tabla = "no info"
+
+    obj = {
+        'status': 'OK',
+        'data': {
+            'table':info_tabla
+        }
+    }
+    return jsonify(obj)
+
+@app.route('/groups_raw', methods=['POST'])
+def group_r():
+    payload = request.json
+    if "filtro" in payload:
+        data = process.group_rows(payload["tabla"], payload["var_agg"], payload["agregador"], payload["filtro"])
+    else:
+        data = process.group_rows(payload["tabla"], payload["var_agg"], payload["agregador"])
+    if data.empty==False:
+        info_tabla = data.to_dict()
+
+
+    else:
+        info_tabla = "no info"
+
+    obj = {
+        'status': 'OK',
+        'data': {
+            'table':info_tabla
+        }
+    }
+    return jsonify(obj)
+
+
+@app.route('/factor_x', methods=['POST'])
+def fact_x():
+    payload = request.json
+    if "filtro" in payload:
+        data = process.total_expansion(payload["tabla"], payload["var_agg"], payload["agregador"], payload["filtro"])
+    else:
+        data = process.total_expansion(payload["tabla"], payload["var_agg"], payload["agregador"])
+    if data.empty==False:
+        info_tabla = data.to_dict()
+
+
+    else:
+        info_tabla = "no info"
+
+    obj = {
+        'status': 'OK',
+        'data': {
+            'table':info_tabla
+        }
+    }
+    return jsonify(obj)
+
 @app.route('/raw_query', methods=['POST'])
 def raw_query():
     payload = request.json

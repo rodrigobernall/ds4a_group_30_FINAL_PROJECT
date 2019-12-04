@@ -30,3 +30,21 @@
         }
         
      - Pueden salir NAN y son casos en los que no se especifica la edad o el factor de agregacion 
+ 
+ - `/build_count` is the same as the aggregator percentage but instead it counts 
+  - `/groups_raw` brings both groups wihtout aggregating and you can add a filter like this :
+  
+    - - {
+	"tabla":"area_personas",
+	"var_agg":"p6020",
+	"agregador":"p6040",
+	"filtro":"mes=3"
+      }
+      
+ - `/factor_x` It give you the whole population by aggregating within this two grups and adding by its expansion factor ej:
+    - - {
+	"tabla":"area_personas",
+	"var_agg":"p6020",
+	"agregador":"p6040",
+	"filtro":"mes=3"
+      }
