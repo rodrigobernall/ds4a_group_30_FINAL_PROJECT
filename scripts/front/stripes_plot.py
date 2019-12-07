@@ -8,10 +8,14 @@ from dash.dependencies import Input, Output
 
 
 
-df = pd.read_csv('tasa_desempleo.csv')
+df = pd.read_csv('survival_nivel_educ.csv')
+df['fact'] = pd.Categorical(df['fact'].astype(int))
+df.columns = ['index', 'Meses', 'Porcentaje de personas', 'Categoría'] 
+df.drop(columns=['index', 'Porcentaje de personas'], inplace=True)
+#df['Porcentaje de personas'] = (df['Porcentaje de personas'])*100
 
 col_options = [dict(label=x, value=x) for x in df.columns]
-dimensions = ["x (meses)", "y (tasa de desempleo)"]
+dimensions = ["x", "y"]
 
 app = dash.Dash(
     __name__, external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"]
@@ -19,7 +23,7 @@ app = dash.Dash(
 
 app.layout = html.Div(
     [
-        html.H1("Inverse survival plot"),
+        html.H1("Survival analysis"),
         html.Div(
             [
                 html.P([d + ":", dcc.Dropdown(id=d, options=col_options)])
@@ -27,14 +31,14 @@ app.layout = html.Div(
             ],
             style={"width": "25%", "float": "left"},
         ),
-        dcc.Graph(id="lineplot", style={"width": "75%", "display": "inline-block"}),
+        dcc.Graph(id="stripplot", style={"width": "75%", "display": "inline-block"}),
     ]
 )
 
 
-@app.callback(Output("lineplot", "figure"), [Input(d, "value") for d in dimensions])
+@app.callback(Output("stripplot", "figure"), [Input(d, "value") for d in dimensions])
 def make_figure(x, y):
-    fig = px.line(df, x=x, y=y, line_shape='spline', height=700, title='Mi análisis')
+    fig = px.strip(df, x=x, y=y, height=700, title='Mi análisis')
     fig.update_xaxes(title_text='Meses')
     fig.update_yaxes(title_text='Tasa de desempleo')
     fig.update_traces(hoverinfo='text+name', mode='lines+markers')
@@ -43,4 +47,4 @@ def make_figure(x, y):
 
 app.run_server(debug=True)
 
-gshfkwufywt735281!
+#gshfkwufywt735281!
