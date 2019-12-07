@@ -48,3 +48,39 @@
 	"agregador":"p6040",
 	"filtro":"mes=3"
       }
+
+- `employement_rate` this end point allow you to analyze unemployment rate by several factors and filter yo can  remove any filter and it will work. The Only mandatory filter is month Ex:
+    - {
+"month":1,
+"gender":"Hombre",
+"municipality":11,
+"age_base": 23,
+"age_top":35,
+"marital_status":"Esta soltero (a)",
+"aggregator":"nivel_educ"}
+    - {
+"month":1,
+"gender":"Hombre",
+"municipality":11,
+"age_base": 23,
+"age_top":35,
+"marital_status":"Esta soltero (a)"}
+    - {"month":12,
+"gender":"Mujer",
+"municipality":11,
+"age_base": 18,
+"age_top":18,
+"aggregator":"nivel_educ"}
+
+- `survival` this brings you the survayval information with the same filter struction as the employment end point:
+
+    - {
+"month":1,
+"gender":"Hombre",
+"municipio":76,
+"age_base": 23,
+"age_top":35,
+"marital_status":"Esta soltero (a)",
+"aggregator":"nivel_educ"
+	
+}
