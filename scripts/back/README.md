@@ -42,7 +42,7 @@
       }
       
  - `/factor_x` It give you the whole population by aggregating within this two grups and adding by its expansion factor ej:
-    - - {
+    - {
 	"tabla":"area_personas",
 	"var_agg":"p6020",
 	"agregador":"p6040",

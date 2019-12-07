@@ -165,6 +165,63 @@ def raw_query():
     }
     return jsonify(obj)
 
+@app.route('/employement_rate', methods=['POST'])
+def employement_rate():
+    payload = request.json
+
+
+    if "gender" not in payload:
+        genero = None
+    else:
+        genero =payload["gender"]
+
+    if "month" not in payload:
+        month = 1
+    else:
+        month =payload["month"]
+
+    if "municipality" not in payload:
+        municipality = None
+    else:
+        municipality =payload["municipality"]
+
+    if "age_base" not in payload:
+        age_base = None
+    else:
+        age_base =payload["age_base"]
+
+    if "age_top" not in payload:
+        age_top = None
+    else:
+        age_top =payload["age_top"]
+
+    if "marital_status" not in payload:
+        marital_status = None
+    else:
+        marital_status =payload["marital_status"]
+
+    if "aggregator" not in payload:
+        aggregator = None
+    else:
+        aggregator =payload["aggregator"]
+
+    data = process.ocupancy_rate(genero, month, municipality, age_base, age_top,marital_status,  aggregator)
+
+    if data.empty==False:
+        info_tabla = data.to_dict()
+
+
+    else:
+        info_tabla = "no info"
+
+    obj = {
+        'status': 'OK',
+        'data': {
+            'table':info_tabla
+        }
+    }
+    return jsonify(obj)
+
 @app.route('/status', methods=["GET"])
 def status():
     return jsonify({"message": "ok"})
