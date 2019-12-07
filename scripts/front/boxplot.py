@@ -39,9 +39,9 @@ app.layout = html.Div(
 @app.callback(Output("stripplot", "figure"), [Input(d, "value") for d in dimensions])
 def make_figure(x, y):
     fig = px.strip(df, x=x, y=y, height=700, title='Mi análisis')
-    #fig.update_xaxes(title_text='Meses')
-    #fig.update_yaxes(title_text='Tasa de desempleo')
-    #fig.update_traces(hoverinfo='text+name', mode='lines+markers')
+    fig.update_xaxes(title_text='Meses')
+    fig.update_yaxes(title_text='Tasa de desempleo')
+    fig.update_traces(hoverinfo='text+name', mode='lines+markers')
     return fig
 
 
