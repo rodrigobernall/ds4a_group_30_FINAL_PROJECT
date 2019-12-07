@@ -22,7 +22,7 @@ app.layout = html.Div(
         html.H1("Inverse survival plot"),
         html.Div(
             [
-                html.P([d + ":", dcc.Dropdown(id=d, options=col_options, value=d)])
+                html.P([d + ":", dcc.Dropdown(id=d, options=col_options)])
                 for d in dimensions
             ],
             style={"width": "25%", "float": "left"},
@@ -33,10 +33,11 @@ app.layout = html.Div(
 
 
 @app.callback(Output("lineplot", "figure"), [Input(d, "value") for d in dimensions])
-def make_figure(x, y, color):
-    fig = px.line(df, x=x, y=y, color=color, line_shape='spline', height=700, title='Mi análisis')
+def make_figure(x, y):
+    fig = px.line(df, x=x, y=y, line_shape='spline', height=700, title='Mi análisis')
     fig.update_xaxes(title_text='Meses')
     fig.update_yaxes(title_text='Tasa de desempleo')
+    fig.update_traces(hoverinfo='text+name', mode='lines+markers')
     return fig
 
 
