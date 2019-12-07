@@ -15,22 +15,35 @@ import plotly.graph_objs as go
 from dash.dependencies import Input, Output, State
 import json
 from sqlalchemy import create_engine
+import locale
+locale.setlocale(locale.LC_ALL, '')
 
 #app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/uditagarwal/pen/oNvwKNP.css'])
 #app = dash.Dash(__name__, external_stylesheets=['https://github.com/plotly/dash-sample-apps/blob/master/apps/dash-oil-and-gas/assets/styles.css'])
 app = dash.Dash(__name__, external_stylesheets=['https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css'])
 token = 'pk.eyJ1IjoibmV3dXNlcmZvcmV2ZXIiLCJhIjoiY2o2M3d1dTZiMGZobzMzbnp2Z2NiN3lmdyJ9.cQFKe3F3ovbfxTsM9E0ZSQ'
 
+
+def get_rows(str_query=None):
+    response = requests.post("http://ec2-3-133-150-215.us-east-2.compute.amazonaws.com:8020/raw_query", json={"raw_query":str_query})
+    return response.json()
+
+
+def fetch_series(dfx, series_name):
+	series_name = dfx[series_name] 
+	return series_name
+
 with open('Colombia_Transformado.json') as f:
     geojson = json.loads(f.read())
 
 df_correc = pd.read_csv('df_colombia.csv')
-df_correc['MPIOS'] = df_correc['MPIOS'].apply(lambda x: str(x))
-df_correc['MPIOS'] = df_correc['MPIOS'].str.zfill(5)
+
 df_correc['DPTO']=df_correc['DPTO'].apply(lambda x: '{0:0>3}'.format(x))
 df_correc['MPIO']=df_correc['MPIO'].apply(lambda x: '{0:0>3}'.format(x))
 df_correc['COD_DANE']=df_correc['DPTO'].astype(str)+df_correc['MPIO'].astype(str)
 
+df_areas = get_rows("select * from areas where activo is true order by area")
+df_areas = pd.DataFrame.from_dict(df_areas['data']['table'])
 
 def download_dict_api(dict_name=None):
 	r =requests.get('http://ec2-3-133-150-215.us-east-2.compute.amazonaws.com:8020/factors/'+dict_name)
@@ -44,6 +57,10 @@ sex = download_dict_api(dict_name='sex_dict')
 educational = download_dict_api(dict_name='education_dict')
 print(sex)
 
+def get_areas():
+    df_areas2 = get_rows("select * from areas where activo is true")
+    df_areas2 = pd.DataFrame.from_dict(df_areas2['data']['table'])
+    return df_areas2
 
 def create_radio_selector(sel_id=None, pandas_series=None):
 	radio_selector = dcc.RadioItems(
@@ -61,9 +78,14 @@ def create_dropdown_selector(sel_id=None, pandas_series=None):
 		)
 	return dropdown_selector
 
-marital_select = create_dropdown_selector(sel_id='marital-select', pandas_series=marital_status['marital_status'])
-sex_select = create_radio_selector(sel_id='sex-select', pandas_series=sex['sex_status'])
-educational_select = create_dropdown_selector(sel_id='educational-select', pandas_series=educational['education_level'])
+def get_how_many():
+    df_how_many = get_rows("select round(sum(fex_c_2011)) from area_personas where mes=1 and area=11 and p6040 between 14 and 26")
+    df_areas2 = pd.DataFrame.from_dict(df_areas2['data']['table'])
+    return df_areas2
+
+marital_select = create_dropdown_selector(sel_id='marital-select', pandas_series=marital_status['valor'])
+sex_select = create_radio_selector(sel_id='sex-select', pandas_series=sex['valor'])
+educational_select = create_dropdown_selector(sel_id='educational-select', pandas_series=educational['valor'])
 
 
 app.layout = html.Div(children=[
@@ -100,7 +122,7 @@ app.layout = html.Div(children=[
                     html.Div(
                     [
                     html.Img(
-                            src=app.get_asset_url("mintic.jpg"),
+                            src=app.get_asset_url("mintic_nuevo.jpg"),
                             id="mintic-image",
                             style={
                                 "height": "150px",
@@ -148,12 +170,11 @@ app.layout = html.Div(children=[
                         ),
                         html.Div(
                             children=[
-                                    html.H6("Seleccione Municipio"),
+                                    html.H6("Seleccione Municipio2"),
                                     dcc.Dropdown(
-                                        id="study-dropdown",
-                                        multi=True,
-                                        value=(11,),
-                                        options=[{'label': label, 'value': value} for label, value in np.unique(df_correc[['NOMBRE_MPI', 'COD_DANE']], axis=0)]
+                                        id="study-dropdown2",
+                                        value='Bogotá',
+                                        options=[{'label': label, 'value': label} for label in df_areas['area'].unique()]
                                     )
                                 ]
                         ),
@@ -200,13 +221,20 @@ app.layout = html.Div(children=[
                         [
                         html.Div(
                             [
-                                html.H6("Nivel Educativo:", className="control_label"),
-                                html.H6("Nivel Educativo:", className="control_label"),
-                                ],
+                                html.H5("Cuántos Como Yo?"),
+                                html.H6(
+                                    id="how_many",
+                                    className="info_text"
+                                )
+                            ],
                             className="pretty_container",
                         ),
                         html.Div(
-                            [html.H6("Nivel Educativo:", className="control_label")],
+                           [
+                                html.H6("Cuántos Como Yo (Económicamente Activos)?", className="control_label"),
+                                html.H6(id = "how_many_eco",
+                                   children=["init"]),
+                            ],
                             className="pretty_container",
                         ),
                         html.Div(
@@ -237,7 +265,7 @@ app.layout = html.Div(children=[
                                     margin={'t': 0, 'l': 0, 'r': 0, 'b': 0},
                                     mapbox_center={"lat": 4.6109886, "lon": -74.072092}
                                 )
-                                }
+                            }
                         )
 
                     ],
@@ -259,7 +287,21 @@ app.layout = html.Div(children=[
 
 
 def get_filtered_rows(municipios):
-    data = df_correc[df_correc['NOMBRE_MPI'].isin(municipios)].copy()
+    #data = df_correc[df_correc['NOMBRE_MPI'].isin(municipios)].copy()
+    #data = df_correc[df_correc['MPIOS'].isin(municipios)].copy()
+    print("get_filtered_rows mun " + municipios)
+    df_areas_sel = get_areas()
+    #print(df_areas_sel)
+    
+    area_selected = df_areas_sel.loc[df_areas_sel['area']==municipios]
+    
+    #print(area_selected)
+    area_cod = area_selected.iloc[0]['area_cod']
+    #area_code = area_cod.astype(str).apply(lambda x: '{0:0>3}'.format(x))
+    area_code = str(area_cod).zfill(3)
+    print(area_code)
+    data = df_correc[(df_correc['DPTO'] == area_code) & (df_correc['MPIO'] == '001')]
+    print(data)
     return data
 
 def info_por_municipio(municipios):
@@ -281,7 +323,7 @@ def info_por_municipio(municipios):
 @app.callback(
     dash.dependencies.Output('map-plot', 'figure'), # component with id map-plot will be changed, the 'figure' argument is updated
     [
-        dash.dependencies.Input('study-dropdown', 'value'),
+        dash.dependencies.Input('study-dropdown2', 'value'),
     ]
 )
 def actualizar_mapa(value):
@@ -297,14 +339,7 @@ def actualizar_mapa(value):
         }
 
 
-def get_rows(str_query=None):
-    response = requests.post("http://ec2-3-133-150-215.us-east-2.compute.amazonaws.com:8020/raw_query", json={"raw_query":str_query})
-    return response.json()
 
-
-def fetch_series(dfx, series_name):
-	series_name = dfx[series_name] 
-	return series_name
 
 @app.callback(
     dash.dependencies.Output('barplot', 'figure'),
@@ -316,8 +351,9 @@ def fetch_series(dfx, series_name):
 def update_barplot(month_value):
     x_name = 'Edad'
     y_name = 'Cantidad de personas'
+    print("update_barplot> " + str(month_value))
     test_json = get_rows("select ap.p6040 as \"Edad\", round(sum(fex_c_2011)) as \"Cantidad de personas\" from area_personas ap where mes="+month_value+" group by ap.p6040")
-
+    #test_json = get_rows("select ap.p6040 as \"Edad\", round(sum(fex_c_2011)) as \"Cantidad de personas\" from area_personas ap where mes=5 group by ap.p6040")
     df = pd.DataFrame.from_dict(test_json['data']['table'])
     
     series_x = fetch_series(df, x_name)
@@ -329,32 +365,34 @@ def update_barplot(month_value):
 			'layout': {'title': 'Diagrama de barras de {} y {}'.format(x_name, y_name),}
 			}
 
-@app.callback(
-    dash.dependencies.Output('barplot_oficio', 'figure'),
+
+@app.callback( dash.dependencies.Output('how_many', 'children'),
     (
         dash.dependencies.Input('month-dropdown', 'value'),
-        dash.dependencies.Input('study-dropdown', 'value'),
+        dash.dependencies.Input('study-dropdown2', 'value'),
     )
 )
-
-def update_barplot_oficio(month_value, ciudad_value):
-    y_name = 'Oficio'
-    x_name = 'Cantidad de personas'
-    print(ciudad_value[0])
-    test_json = get_rows("select \"Oficio\", sum(\"Conteo\") as \"Cantidad de personas\" from view_ocupados vo where \"Ciudad\"='"+ciudad_value[0]+"' and \"Mes\"="+month_value+" group by \"Oficio\" order by \"Cantidad de personas\" DESC")
-
-    df = pd.DataFrame.from_dict(test_json['data']['table'])
-    print(df)
-
-    series_x = fetch_series(df, x_name)
-    series_y = fetch_series(df, y_name)
+def update_how_many(month_value, municipios):
+    print("get_filtered_rows mun " + municipios)
+    df_areas_sel = get_areas()
+    #print(df_areas_sel)
     
-    series_plot = go.Bar(x=series_x, y=series_y, orientation='h' )
-    return {'data': 
-				[series_plot],
-			'layout': {'title': 'Diagrama de barras de {} y {}'.format(x_name, y_name),}
-			}
+    area_selected = df_areas_sel.loc[df_areas_sel['area']==municipios]
+    
+    #print(area_selected)
+    area_cod = area_selected.iloc[0]['area_cod']
+    #area_code = area_cod.astype(str).apply(lambda x: '{0:0>3}'.format(x))
+    area_code = str(area_cod).zfill(3)
+    print(area_code)
 
+
+    how_json = get_rows("select round(sum(fex_c_2011)) from area_personas where mes="+month_value+" and area="+area_code+" and p6040 between 14 and 26")
+    df = pd.DataFrame.from_dict(how_json['data']['table'])
+    value = df['round']
+    print(locale.format("%d", value, grouping=True))
+
+   
+    return "   Total: " + locale.format("%d", value, grouping=True)
 
 if __name__ == "__main__":
     app.run_server(debug=True)
