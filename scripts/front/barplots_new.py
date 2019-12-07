@@ -30,6 +30,7 @@ ing_educ_query = ing_educ_query + ' ' + filters + ' ' + groupby + ' ' + orderby
 df_ing_educ = get_rows(ing_educ_query)
 df_ing_educ = pd.DataFrame.from_dict(df_ing_educ['data']['table'])
 df_ing_educ['Ingreso promedio'] = round(df_ing_educ['Ingreso promedio'])
+df_ing_educ.dropna(inplace=True)
 print(df_ing_educ)
 
 
@@ -45,6 +46,7 @@ ing_ocu_query = ing_ocu_query + ' ' + filters + ' ' + groupby + ' ' + orderby
 df_ing_ocu = get_rows(ing_ocu_query)
 df_ing_ocu = pd.DataFrame.from_dict(df_ing_ocu['data']['table'])
 df_ing_ocu['Ingreso promedio'] = round(df_ing_ocu['Ingreso promedio'])
+df_ing_ocu.dropna(inplace=True)
 print(df_ing_ocu)
 
 
@@ -59,6 +61,7 @@ unemp_ocup_query = unemp_ocup_query + ' ' + filters + ' ' + groupby + ' ' + orde
 
 df_unemp_ocup = get_rows(unemp_ocup_query)
 df_unemp_ocup = pd.DataFrame.from_dict(df_unemp_ocup['data']['table'])
+df_unemp_ocup.dropna(inplace=True)
 print(df_unemp_ocup)
 
 
