@@ -143,15 +143,15 @@ def ocupancy_rate(gender=None, month=1, municipality=None, age_base=None, age_to
     base = base.loc[base.index.repeat(base.factor)]
 
     if agregador is not None:
-        resp = base.groupby([ agregador, "ocupado"]).agg({'municipio': 'count'})
+        resp = base.groupby([ agregador, "ocupado"]).agg({'factor': 'count'})
         resp["tasa"] = resp.groupby(level=0).apply(lambda x: 100 * x / float(x.sum()))
         resp = resp.reset_index()
     else:
-        resp = base.groupby([ "ocupado"]).agg({'municipio': 'count'})
-        resp["tasa"] = (resp["municipio"] / (resp["municipio"].sum()))*100
+        resp = base.groupby([ "ocupado"]).agg({'factor': 'count'})
+        resp["tasa"] = (resp["factor"] / (resp["factor"].sum()))*100
         resp = resp.reset_index()
 
-    resp = resp.rename(columns= {"municipio":"total"})
+    resp = resp.rename(columns= {"factor":"total"})
 
 
 
