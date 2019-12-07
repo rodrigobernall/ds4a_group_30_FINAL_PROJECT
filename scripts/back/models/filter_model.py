@@ -88,7 +88,7 @@ def filter_builder(dict_values ):
 def ocupancy_rate(gender=None, month=1, municipality=None, age_base=None, age_top=None, estado_civil= None,  agregador = None):
 
 
-    base = table_query("""with temp as (
+    query = ("""with temp as (
     select
     per.AREA as municipio,
     p2.valor as sexo,
@@ -122,21 +122,26 @@ def ocupancy_rate(gender=None, month=1, municipality=None, age_base=None, age_to
     select * from temp 
     where ocupado is not null and mes = M_change""".replace("M_change", str(month)))
 
+
+
+    if gender is not None:
+        query = query + " and sexo = " + "'"+ gender + "' "
+    if municipality is not None :
+        query = query + " and municipio = " + str(municipality) + " "
+    if age_base is not None:
+        query = query + " and edad >= " + str(age_base) + " "
+        #base = base[base["edad"] >= age_base]
+    if age_top is not None:
+        #base = base[base["edad"] <= age_top]
+        query = query + " and edad <= " + str(age_top) + " "
+    if estado_civil is not None:
+        query = query + " and estado_civil = " +"'"+ str(estado_civil) + "' "
+        #base = base[base["estado_civil"] == estado_civil]
+
+    base = table_query(query)
     base['factor'] = base['factor'].round()
     base = base.loc[base.index.repeat(base.factor)]
 
-    if month is not None :
-        base = base[base["mes"] == month]
-    if gender is not None:
-        base = base[base["sexo"] == gender]
-    if municipality is not None :
-        base = base[base["municipio"] == municipality]
-    if age_base is not None:
-        base = base[base["edad"] >= age_base]
-    if age_top is not None:
-        base = base[base["edad"] <= age_top]
-    if estado_civil is not None:
-        base = base[base["estado_civil"] == estado_civil]
     if agregador is not None:
         resp = base.groupby([ agregador, "ocupado"]).agg({'municipio': 'count'})
         resp["tasa"] = resp.groupby(level=0).apply(lambda x: 100 * x / float(x.sum()))
