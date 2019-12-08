@@ -53,7 +53,7 @@ print(df_ing_ocu)
 
 ## Desempleo por ocupaciones
 
-unemp_ocup_query = "select \"Ocupación\", round(100-100*(sum(\"Ocupado\"::INTEGER::FLOAT) / count(*)::FLOAT)::NUMERIC, 2) as \"Tasa de desempleo\" from view_ocupados_desocupados"
+unemp_ocup_query = "select \"Ocupación\", round(100-100*(sum(\"Ocupado\"::INTEGER::FLOAT*fex_c_2011) / sum(fex_c_2011)::FLOAT)::NUMERIC, 2) as \"Tasa de desempleo\" from view_ocupados_desocupados"
 filters = "where mes = " + mes + "and \"Ocupación\" <> 'ND' and \"Sexo\" = '" + sexo + "'" 
 groupby = "group by \"Ocupación\""
 orderby = "order by \"Tasa de desempleo\" desc;"
