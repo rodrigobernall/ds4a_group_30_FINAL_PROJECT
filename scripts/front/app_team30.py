@@ -55,7 +55,6 @@ def download_dict_api(dict_name=None):
 marital_status = download_dict_api(dict_name='marital_dict')
 sex = download_dict_api(dict_name='sex_dict')
 educational = download_dict_api(dict_name='education_dict')
-print(sex)
 
 def get_areas():
     df_areas2 = get_rows("select * from areas where activo is true")
@@ -145,6 +144,16 @@ app.layout = html.Div(children=[
                 [
                    html.Div(
                     [
+                        html.Div(
+                            children=[
+                                    html.H6("Seleccione Municipio"),
+                                    dcc.Dropdown(
+                                        id="study-dropdown2",
+                                        value='Bogotá',
+                                        options=[{'label': label, 'value': label} for label in df_areas['area'].unique()]
+                                    )
+                                ]
+                        ),
                         html.H6(
                             "Seleccione un mes:",
                             className="control_label",
@@ -168,32 +177,47 @@ app.layout = html.Div(children=[
                             ],
                             value='1'
                         ),
-                        html.Div(
-                            children=[
-                                    html.H6("Seleccione Municipio2"),
-                                    dcc.Dropdown(
-                                        id="study-dropdown2",
-                                        value='Bogotá',
-                                        options=[{'label': label, 'value': label} for label in df_areas['area'].unique()]
-                                    )
-                                ]
+                        html.H6(
+                            "Seleccione un rango de edad:",
+                            className="control_label",
                         ),
-                        html.Div(
-                            children=[
-                                html.H6("Estado Civil:", className="control_label"), 
-                                marital_select
-                            ]
+                        dcc.RangeSlider(
+                            id="age_slider",
+                            min=18,
+                            max=96,
+                            marks={
+                                18: '18',
+                                26: '26',
+                                32: '32',
+                                40: '40',
+                                48: '48',
+                                56: '56',
+                                64: '64',
+                                72: '72',
+                                80: '80',
+                                88: '88',
+                                96: '96',
+                            },
+                            value=[10, 30],
+                            className="dcc_control",
                         ),
                         html.Div(
                             children=[
                                 html.H6("Género:", className="control_label"), 
-                                sex_select
+                                 dcc.RadioItems(id = 'sex_radio',
+                                    options = [{'label': i, 'value': i} for i in ['Hombre','Mujer']],
+                                    value = 'Hombre')
                             ]
                         ),
                         html.Div(
                             children=[
                                 html.H6("Nivel Educativo:", className="control_label"), 
-                                educational_select
+                                
+                                dcc.Dropdown(
+                                        id="educational_select",
+                                        value='Ninguno',
+                                        options=[{'label': label, 'value': label} for label in educational['valor'].unique()]
+                                    )
                             ]
                         ),
                         
@@ -207,8 +231,18 @@ app.layout = html.Div(children=[
                 [
                 html.Div(
                     [
-                       dcc.Graph(id="barplot"),
-
+                       html.H1(children="Mapa de Colombia", style={'textAlign': 'center'}),
+                            dcc.Graph(id='map-plot', figure={ 
+                            'data': [go.Choroplethmapbox()],
+                            'layout': go.Layout(
+                                    mapbox_style="dark",
+                                    mapbox_accesstoken=token,
+                                    mapbox_zoom=5,
+                                    margin={'t': 0, 'l': 0, 'r': 0, 'b': 0},
+                                    mapbox_center={"lat": 4.6109886, "lon": -74.072092}
+                                )
+                            }
+                        )
                     ],
                     className="pretty_container",
                 ),
@@ -231,14 +265,31 @@ app.layout = html.Div(children=[
                         ),
                         html.Div(
                            [
-                                html.H6("Cuántos Como Yo (Económicamente Activos)?", className="control_label"),
+                                html.H5("Cuántos Como Yo (Económicamente Activos)?"),
                                 html.H6(id = "how_many_eco",
-                                   children=["init"]),
+                                    className="info_text"),
                             ],
                             className="pretty_container",
                         ),
                         html.Div(
-                            [html.H6("Nivel Educativo:", className="control_label")],
+                            [
+                                html.H5("% Desempleo en Personas Como Yo"),
+                                html.H6(id = "tasa_desem_comoyo",
+                                    className="info_text"),],
+                            className="pretty_container",
+                        ),
+                        html.Div(
+                            [
+                                html.H5("% Desempleo en la Ciudad"),
+                                html.H6(id = "tasa_desem_ciud",
+                                    className="info_text"),],
+                            className="pretty_container",
+                        ),
+                        html.Div(
+                            [
+                                html.H5("Tiempo estimado para encontrar Empleo"),
+                                html.H6(id = "tiempo_estimado_model",
+                                    className="info_text"),],
                             className="pretty_container",
                         ),
                         ],
@@ -255,19 +306,7 @@ app.layout = html.Div(children=[
                 [
                   html.Div(
                     [
-                        html.H1(children="Mapa de Colombia", style={'textAlign': 'center'}),
-                            dcc.Graph(id='map-plot', figure={ 
-                            'data': [go.Choroplethmapbox()],
-                            'layout': go.Layout(
-                                    mapbox_style="dark",
-                                    mapbox_accesstoken=token,
-                                    mapbox_zoom=5,
-                                    margin={'t': 0, 'l': 0, 'r': 0, 'b': 0},
-                                    mapbox_center={"lat": 4.6109886, "lon": -74.072092}
-                                )
-                            }
-                        )
-
+                        dcc.Graph(id="barplot"),
                     ],
                     className="pretty_container",
                 ),
@@ -282,33 +321,35 @@ app.layout = html.Div(children=[
             ),       
         ],
         
+    ),
+    html.Div(
+        className='twelve columns card 3 pretty_container',
+            children=[
+                html.H5("Ocupaciones con Mayor Tasa de Desempleo"),
+                dcc.Graph(id="unemp_ocup"),
+            ]
+    ),
+    html.Div(
+        className='twelve columns card 3 pretty_container',
+            children=[
+                html.H5("Ingreso Promedio Por Ocupación"),
+                dcc.Graph(id="ing_ocup"),
+            ]
     )
 ])
 
 
 def get_filtered_rows(municipios):
-    #data = df_correc[df_correc['NOMBRE_MPI'].isin(municipios)].copy()
-    #data = df_correc[df_correc['MPIOS'].isin(municipios)].copy()
-    print("get_filtered_rows mun " + municipios)
     df_areas_sel = get_areas()
-    #print(df_areas_sel)
-    
     area_selected = df_areas_sel.loc[df_areas_sel['area']==municipios]
-    
-    #print(area_selected)
     area_cod = area_selected.iloc[0]['area_cod']
-    #area_code = area_cod.astype(str).apply(lambda x: '{0:0>3}'.format(x))
     area_code = str(area_cod).zfill(3)
-    print(area_code)
     data = df_correc[(df_correc['DPTO'] == area_code) & (df_correc['MPIO'] == '001')]
-    print(data)
     return data
 
 def info_por_municipio(municipios):
     data =[]
-    # print(municipios)
     df = get_filtered_rows(municipios)
-    # print(df)
     data.append(go.Choroplethmapbox(
                 geojson=geojson,
                 locations=df['MPIOS'],
@@ -317,7 +358,6 @@ def info_por_municipio(municipios):
                 text=df['NOMBRE_MPI'],
                 colorbar_title="HECTAREAS"
             ))
-    # print(data)
     return data
 
 @app.callback(
@@ -327,14 +367,22 @@ def info_por_municipio(municipios):
     ]
 )
 def actualizar_mapa(value):
+    df_areas_sel = get_areas()
+    #print(df_areas_sel)
+    
+    area_selected = df_areas_sel.loc[df_areas_sel['area']==value]
+    
+    #print(area_selected)
+    area_lat = area_selected.iloc[0]['latitude']
+    area_lon = area_selected.iloc[0]['longitude']
     return { 
             'data': info_por_municipio(value),
             'layout': go.Layout(
-                mapbox_style="open-street-map",
+                mapbox_style="dark",
                 mapbox_accesstoken=token,
                 mapbox_zoom=7,
                 margin={'t': 0, 'l': 0, 'r': 0, 'b': 0},
-                mapbox_center={"lat": 4.6109886, "lon": -74.072092}
+                mapbox_center={"lat": area_lat, "lon": area_lon}
             )
         }
 
@@ -351,7 +399,6 @@ def actualizar_mapa(value):
 def update_barplot(month_value):
     x_name = 'Edad'
     y_name = 'Cantidad de personas'
-    print("update_barplot> " + str(month_value))
     test_json = get_rows("select ap.p6040 as \"Edad\", round(sum(fex_c_2011)) as \"Cantidad de personas\" from area_personas ap where mes="+month_value+" group by ap.p6040")
     #test_json = get_rows("select ap.p6040 as \"Edad\", round(sum(fex_c_2011)) as \"Cantidad de personas\" from area_personas ap where mes=5 group by ap.p6040")
     df = pd.DataFrame.from_dict(test_json['data']['table'])
@@ -362,7 +409,7 @@ def update_barplot(month_value):
     series_plot = go.Bar(x=series_x, y=series_y )
     return {'data': 
 				[series_plot],
-			'layout': {'title': 'Diagrama de barras de {} y {}'.format(x_name, y_name),}
+			'layout': {'title': 'Diagrama de barras de {} y {}'.format(x_name, y_name),},
 			}
 
 
@@ -370,10 +417,10 @@ def update_barplot(month_value):
     (
         dash.dependencies.Input('month-dropdown', 'value'),
         dash.dependencies.Input('study-dropdown2', 'value'),
+        dash.dependencies.Input('age_slider', 'value'),
     )
 )
-def update_how_many(month_value, municipios):
-    print("get_filtered_rows mun " + municipios)
+def update_how_many(month_value, municipios, age_slider):
     df_areas_sel = get_areas()
     #print(df_areas_sel)
     
@@ -383,16 +430,208 @@ def update_how_many(month_value, municipios):
     area_cod = area_selected.iloc[0]['area_cod']
     #area_code = area_cod.astype(str).apply(lambda x: '{0:0>3}'.format(x))
     area_code = str(area_cod).zfill(3)
-    print(area_code)
-
-
-    how_json = get_rows("select round(sum(fex_c_2011)) from area_personas where mes="+month_value+" and area="+area_code+" and p6040 between 14 and 26")
+    sql_many = "select round(sum(fex_c_2011)) from area_personas where mes="+month_value+" and area="+area_code+" and p6040 between "+str(age_slider[0])+" and "+str(age_slider[1])+""
+    how_json = get_rows(sql_many)
     df = pd.DataFrame.from_dict(how_json['data']['table'])
     value = df['round']
-    print(locale.format("%d", value, grouping=True))
-
-   
     return "   Total: " + locale.format("%d", value, grouping=True)
+
+@app.callback( dash.dependencies.Output('how_many_eco', 'children'),
+    (
+        dash.dependencies.Input('month-dropdown', 'value'),
+        dash.dependencies.Input('study-dropdown2', 'value'),
+        dash.dependencies.Input('age_slider', 'value'),
+    )
+)
+def update_how_many_eco(month_value, municipios, age_slider):
+    df_areas_sel = get_areas()
+    #print(df_areas_sel)
+    
+    area_selected = df_areas_sel.loc[df_areas_sel['area']==municipios]
+    
+    #print(area_selected)
+    area_cod = area_selected.iloc[0]['area_cod']
+    #area_code = area_cod.astype(str).apply(lambda x: '{0:0>3}'.format(x))
+    area_code = str(area_cod).zfill(3)
+    
+    sql_many = "SELECT round(sum(fex_c_2011)) as \"PEA\" FROM view_ocupados_desocupados where mes="+month_value+" and area="+area_code+" and \"Edad\" between "+str(age_slider[0])+" and "+str(age_slider[1])+""
+    how_json = get_rows(sql_many)
+    df = pd.DataFrame.from_dict(how_json['data']['table'])
+    value = df['PEA']
+    return "   Total: " + locale.format("%d", value, grouping=True)
+
+@app.callback( dash.dependencies.Output('tasa_desem_ciud', 'children'),
+    (
+        dash.dependencies.Input('month-dropdown', 'value'),
+        dash.dependencies.Input('study-dropdown2', 'value'),
+    )
+)
+def update_how_many_eco(month_value, municipios):
+    df_areas_sel = get_areas()
+    #print(df_areas_sel)
+    
+    area_selected = df_areas_sel.loc[df_areas_sel['area']==municipios]
+    
+    #print(area_selected)
+    area_cod = area_selected.iloc[0]['area_cod']
+    #area_code = area_cod.astype(str).apply(lambda x: '{0:0>3}'.format(x))
+    area_code = str(area_cod).zfill(3)
+    
+    sql_many = "select * from view_desempleo_por_mes_ciudad where area="+area_code+" and mes="+month_value+""
+    how_json = get_rows(sql_many)
+    df = pd.DataFrame.from_dict(how_json['data']['table'])
+    value = df['Tasa de desempleo']
+    return "   Total: " + locale.format("%.2f", value, grouping=True) + "%"
+
+@app.callback( dash.dependencies.Output('tasa_desem_comoyo', 'children'),
+    (
+        dash.dependencies.Input('month-dropdown', 'value'),
+        dash.dependencies.Input('study-dropdown2', 'value'),
+        dash.dependencies.Input('educational_select', 'value'),
+        dash.dependencies.Input('sex_radio', 'value'),
+        dash.dependencies.Input('age_slider', 'value'),
+    )
+)
+def update_how_many_comoyo(month_value, municipios, educ_value, sex_value, age_slider):
+    df_areas_sel = get_areas()
+    #print(df_areas_sel)
+    
+    area_selected = df_areas_sel.loc[df_areas_sel['area']==municipios]
+    
+    #print(area_selected)
+    area_cod = area_selected.iloc[0]['area_cod']
+    #area_code = area_cod.astype(str).apply(lambda x: '{0:0>3}'.format(x))
+    area_code = str(area_cod).zfill(3)
+    
+    sql_many = "select round(100-100*(sum(\"Ocupado\"::INTEGER::FLOAT*fex_c_2011) / sum(fex_c_2011)::FLOAT)::NUMERIC, 2) as \"Tasa de desempleo\" from view_ocupados_desocupados where area = "+area_code+" and mes = "+month_value+" and \"Sexo\" = '"+sex_value+"'  and \"Nivel educativo\" = '"+educ_value+"' and \"Edad\" between "+str(age_slider[0])+" and "+str(age_slider[1])+""
+    how_json = get_rows(sql_many)
+    df = pd.DataFrame.from_dict(how_json['data']['table'])
+    value = df['Tasa de desempleo']
+    return "   Total: " + locale.format("%.2f", value, grouping=True) + "%"
+
+
+@app.callback( dash.dependencies.Output('tiempo_estimado_model', 'children'),
+    (
+        dash.dependencies.Input('study-dropdown2', 'value'),
+        dash.dependencies.Input('educational_select', 'value'),
+        dash.dependencies.Input('sex_radio', 'value'),
+        dash.dependencies.Input('age_slider', 'value'),
+    )
+)
+def update_tiempo_estimado_model(municipios, educ_value, sex_value, age_slider):
+    df_areas_sel = get_areas()
+    #print(df_areas_sel)
+    
+    area_selected = df_areas_sel.loc[df_areas_sel['area']==municipios]
+    
+    #print(area_selected)
+    area_cod = area_selected.iloc[0]['area_cod']
+    #area_code = area_cod.astype(str).apply(lambda x: '{0:0>3}'.format(x))
+    area_code = str(area_cod).zfill(3)
+    edad_str = 'MAYOR'
+    if (age_slider[1]>=28):
+        edad_str = 'MAYOR'
+    else:
+        edad_str = 'MENOR'
+
+    
+    sql_many = "select * from modelo where area = "+area_code+" and sexo = '"+sex_value+"' and nivel_educ = '"+educ_value+"' and edad = '"+edad_str+"' "
+    print(sql_many)
+    how_json = get_rows(sql_many)
+    if how_json['data']['table'] == 'no info':
+        return "   Total: 0 meses"
+        
+    df = pd.DataFrame.from_dict(how_json['data']['table'])
+    value = df['tiempo']
+    return "   Total: " + locale.format("%d", value, grouping=True) + " meses"
+
+@app.callback(
+    dash.dependencies.Output('barplot_oficio', 'figure'),
+    (
+        dash.dependencies.Input('month-dropdown', 'value'),
+    )
+)
+
+def update_barplot(month_value):
+    x_name = 'nivel_educ'
+    y_name = 'tasa'
+
+    r = requests.post("http://ec2-3-133-150-215.us-east-2.compute.amazonaws.com:8020/employement_rate", json={"month":1,"gender":"Hombre","municipio":13,"age_base": 18,"age_top":25,"aggregator":"nivel_educ"})
+    df = pd.DataFrame.from_dict(r.json()['data']['table'])
+    df = df[df['ocupado']==0]
+    
+    series_x = fetch_series(df, x_name)
+    series_y = fetch_series(df, y_name)
+    
+    series_plot = go.Bar(x=series_x, y=series_y )
+    return {'data': 
+				[series_plot],
+			'layout': {'title': 'Tasa de desempleo por Nivel Educativo',},
+			}
+
+@app.callback(
+    dash.dependencies.Output('unemp_ocup', 'figure'),
+    (
+        dash.dependencies.Input('month-dropdown', 'value'),
+        dash.dependencies.Input('sex_radio', 'value'),
+    )
+)
+
+def update_unemp_ocup(month_value, sex_value):
+    x_name = 'Ocupación'
+    y_name = 'Tasa de desempleo'
+    unemp_ocup_query = "select \"Ocupación\", round(100-100*(sum(\"Ocupado\"::INTEGER::FLOAT*fex_c_2011) / sum(fex_c_2011)::FLOAT)::NUMERIC, 2) as \"Tasa de desempleo\" from view_ocupados_desocupados"
+    filters = "where mes = " + month_value + " and \"Ocupación\" <> 'ND' and \"Sexo\" = '" + sex_value + "'" 
+    #filters = "where mes = " + month_value + "and \"Ocupación\" <> 'ND' and \"Sexo\" = 'Hombre'" 
+    groupby = "group by \"Ocupación\""
+    orderby = "order by \"Tasa de desempleo\" desc limit 10;"
+    unemp_ocup_query = unemp_ocup_query + ' ' + filters + ' ' + groupby + ' ' + orderby
+    #print("unemp_ocup_query> " + unemp_ocup_query)
+    df_unemp_ocup = get_rows(unemp_ocup_query)
+
+    df_unemp_ocup = pd.DataFrame.from_dict(df_unemp_ocup['data']['table'])
+    df_unemp_ocup.dropna(inplace=True)
+    
+    series_x = fetch_series(df_unemp_ocup, x_name)
+    series_y = fetch_series(df_unemp_ocup, y_name)
+    
+    series_plot = go.Bar(x=series_x, y=series_y )
+    return {'data': 
+				[series_plot],
+			}
+
+@app.callback(
+    dash.dependencies.Output('ing_ocup', 'figure'),
+    (
+        dash.dependencies.Input('month-dropdown', 'value'),
+        dash.dependencies.Input('sex_radio', 'value'),
+    )
+)
+
+def update_ing_ocup(month_value,sex_value):
+    x_name = 'Ocupación'
+    y_name = 'Ingreso promedio'
+    ing_ocu_query = "select \"Ocupación\", avg(\"Ingresos\") as \"Ingreso promedio\" from view_ocupados_desocupados"
+    filters = "where mes = " + month_value + "and \"Ocupación\" <> 'ND' and \"Sexo\" = '" + sex_value + "' and \"Ocupado\" is True "
+    #filters = "where mes = " + month_value + " and \"Ocupación\" <> 'ND' and \"Sexo\" = 'Hombre' and \"Ocupado\" is True  and \"Ingresos\" IS NOT NULL"
+    groupby = "group by \"Ocupación\""
+    orderby = "order by \"Ingreso promedio\" DESC limit 10;"
+    ing_ocu_query = ing_ocu_query + ' ' + filters + ' ' + groupby + ' ' + orderby
+    #print(ing_ocu_query)
+
+    df_ing_ocu = get_rows(ing_ocu_query)
+    df_ing_ocu = pd.DataFrame.from_dict(df_ing_ocu['data']['table'])
+    df_ing_ocu['Ingreso promedio'] = round(df_ing_ocu['Ingreso promedio'])
+    df_ing_ocu.dropna(inplace=True)
+    
+    series_x = fetch_series(df_ing_ocu, x_name)
+    series_y = fetch_series(df_ing_ocu, y_name)
+    
+    series_plot = go.Bar(x=series_x, y=series_y )
+    return {'data': 
+				[series_plot],
+			}
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
